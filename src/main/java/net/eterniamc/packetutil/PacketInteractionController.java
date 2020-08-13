@@ -27,6 +27,9 @@ public enum PacketInteractionController {
     @SuppressWarnings("rawtypes")
     protected final Map<Class<?>, List<Consumer>> observedEvents = Maps.newConcurrentMap();
 
+    /**
+     * This method must be called anytime before the server starts to enable the library
+     */
     @SuppressWarnings("unused")
     public void initialize() {
         MinecraftForge.EVENT_BUS.register(this);
@@ -42,7 +45,12 @@ public enum PacketInteractionController {
         }
     }
 
-    /** Takes in either a class or an object */
+    /**
+     * Takes in either a class or object and searches it for any methods annotated with @PacketListener. If you want to
+     * cancel a packet make the method for it be annotated with @PacketListener(interactable=true) and return true.
+     *
+     * @param listener A class or object to search through
+     */
     @SuppressWarnings("unused")
     public void register(Object listener) {
         if (listener instanceof Class) {

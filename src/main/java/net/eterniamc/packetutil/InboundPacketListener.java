@@ -6,6 +6,14 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 
 import java.util.function.Predicate;
 
+/**
+ * Created by Justin
+ *
+ * Used to quickly intercept packets and send them to listeners while passing on the message to other handlers if it
+ * was not cancelled.
+ *
+ * @param <T> The type of the packet (Packet or IMessage)
+ */
 public class InboundPacketListener<T> extends SimpleChannelInboundHandler<T> {
 
     public InboundPacketListener() {
