@@ -32,9 +32,9 @@ public class InboundPacketListener extends SimpleChannelInboundHandler {
             }
         }
         FMLCommonHandler.instance().getMinecraftServerInstance().addScheduledTask(() ->
-                PacketInteractionController.INSTANCE.observedEvents.keySet().stream()
-                        .filter(c -> c.isAssignableFrom(msg.getClass()))
-                        .flatMap(c -> PacketInteractionController.INSTANCE.observedEvents.get(msg.getClass()).stream())
+                PacketInteractionController.INSTANCE.observedEvents.entrySet().stream()
+                        .filter(c -> c.getKey().isAssignableFrom(msg.getClass()))
+                        .flatMap(c -> c.getValue().stream())
                         .forEach(task -> task.accept(msg))
         );
         ctx.fireChannelRead(msg);
