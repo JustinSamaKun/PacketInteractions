@@ -3,13 +3,11 @@ package net.eterniamc.packetutil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.network.FMLEmbeddedChannel;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.relauncher.Side;
 
 import java.lang.reflect.Method;
@@ -38,10 +36,10 @@ public enum PacketInteractionController {
     @SubscribeEvent
     public void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         EntityPlayerMP player = (EntityPlayerMP) event.player;
-        player.connection.netManager.channel().pipeline().addBefore("fml:packet_handler", "packet_listener",  new InboundPacketListener<Packet<?>>());
+        player.connection.netManager.channel().pipeline().addBefore("fml:packet_handler", "packet_listener",  new InboundPacketListener());
         for (String name : NetworkRegistry.INSTANCE.channelNamesFor(Side.SERVER)) {
             FMLEmbeddedChannel channel = NetworkRegistry.INSTANCE.getChannel(name, Side.SERVER);
-            channel.pipeline().addAfter(channel.pipeline().names().get(1), "message_listener", new InboundPacketListener<IMessage>());
+            channel.pipeline().addAfter(channel.pipeline().names().get(1), "message_listener", new InboundPacketListener());
         }
     }
 

@@ -11,10 +11,9 @@ import java.util.function.Predicate;
  *
  * Used to quickly intercept packets and send them to listeners while passing on the message to other handlers if it
  * was not cancelled.
- *
- * @param <T> The type of the packet (Packet or IMessage)
  */
-public class InboundPacketListener<T> extends SimpleChannelInboundHandler<T> {
+@SuppressWarnings("rawtypes")
+public class InboundPacketListener extends SimpleChannelInboundHandler {
 
     public InboundPacketListener() {
         super(false);
@@ -22,18 +21,22 @@ public class InboundPacketListener<T> extends SimpleChannelInboundHandler<T> {
 
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
-    protected void channelRead0(ChannelHandlerContext ctx, T msg) {
-        if (PacketInteractionController.INSTANCE.interactableEvents.containsKey(msg.getClass())) {
-            for (Predicate predicate : PacketInteractionController.INSTANCE.interactableEvents.get(msg.getClass())) {
-                if (predicate.test(msg)) {
-                    return;
+    protected void channelRead0(ChannelHandlerContext ctx, Object msg) {
+        for (Class<?> type : PacketInteractionController.INSTANCE.interactableEvents.keySet()) {
+            if (type.isAssignableFrom(msg.getClass())) {
+                for (Predicate predicate : PacketInteractionController.INSTANCE.interactableEvents.get(type)) {
+                    if (predicate.test(msg)) {
+                        return;
+                    }
                 }
             }
-        } else if (PacketInteractionController.INSTANCE.observedEvents.containsKey(msg.getClass())) {
-            FMLCommonHandler.instance().getMinecraftServerInstance().addScheduledTask(() ->
-                PacketInteractionController.INSTANCE.observedEvents.get(msg.getClass()).forEach(task -> task.accept(msg))
-            );
         }
+        FMLCommonHandler.instance().getMinecraftServerInstance().addScheduledTask(() ->
+                PacketInteractionController.INSTANCE.observedEvents.keySet().stream()
+                        .filter(c -> c.isAssignableFrom(msg.getClass()))
+                        .flatMap(c -> PacketInteractionController.INSTANCE.observedEvents.get(msg.getClass()).stream())
+                        .forEach(task -> task.accept(msg))
+        );
         ctx.fireChannelRead(msg);
     }
 }
